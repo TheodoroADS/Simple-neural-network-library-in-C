@@ -24,7 +24,7 @@ void matrix_delete(Matrix* mat);
 
 void matrix_apply(Matrix* mat, void (*func)(double*));
 
-void matrix_apply_column(Matrix* mat,int column ,void (*func)(size_t, double*));
+void matrix_apply_rows(Matrix* mat,void (*func)(size_t, double*));
 
 void matrix_render(Matrix* mat);
 

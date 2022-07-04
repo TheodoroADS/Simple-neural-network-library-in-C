@@ -11,7 +11,7 @@ void relu(double* x){
 }
 
 double d_relu(double x){
-   return  x < 0 ? 0 : 1;
+   return  x <= 0 ? 0 : 1;
 }
 
 static inline double sigmoid_func(double x){
@@ -20,6 +20,15 @@ static inline double sigmoid_func(double x){
 
 void sigmoid(double* x){
     *x = sigmoid_func(*x);
+}
+
+
+void sigmoid_output(size_t nb_values, double* values){
+    for (size_t i = 0; i < nb_values; i++)
+    {
+        values[i] = sigmoid_func(values[i]);
+    }
+    
 }
 
 double d_sigmoid(double x){

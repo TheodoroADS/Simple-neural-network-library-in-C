@@ -23,7 +23,7 @@ Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
 
     // printf("putinha \n");
 
-    mat->data = malloc(sizeof(double*) * nb_rows);
+    mat->data = calloc(nb_rows,sizeof(double*));
 
     if (!mat->data){
         free(mat);
@@ -36,7 +36,7 @@ Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
 
     for(size_t i = 0 ; i < nb_rows;  i ++){
         // printf("Caralhinho %lld \n", i);
-        mat->data[i] = malloc(sizeof(double) * nb_cols);
+        mat->data[i] = calloc(nb_cols, sizeof(double));
         if (!mat->data[i]){
             printf("bundinha\n");
             for (int j = 0; j < i ; j ++){
@@ -174,9 +174,7 @@ void matrix_apply(Matrix* mat, void (*func)(double*)){
 
 
 
-void matrix_apply_column(Matrix* mat,int column ,void (*func)(size_t, double*)){
-
-    assert(column < mat->nb_cols);
+void matrix_apply_rows(Matrix* mat,void (*func)(size_t, double*)){
 
     for (size_t i = 0; i < mat->nb_rows; i++)
     {

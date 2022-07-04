@@ -18,5 +18,7 @@ double d_sigmoid(double x);
 
 void softmax(size_t nb_values , double* values);
 
+void sigmoid_output(size_t nb_values, double* values);
+
 Activation_derivative resolve_derivative(Activation_func func);
 
