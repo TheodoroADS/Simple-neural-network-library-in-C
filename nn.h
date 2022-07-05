@@ -50,4 +50,8 @@ double NN_eval_loss(NN* network, double** reference_vals);
 
 void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,double** values, int* labels, double learning_rate);
 
-int* NN_predict_class_batch(NN* network, Matrix* input);
+int* NN_predict_class_batch(NN* network, Matrix* input, int* predictions);
+
+int* NN_predict_class_all(NN* network, size_t how_many, double** values);
+
+

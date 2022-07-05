@@ -5,18 +5,19 @@
 #include "loss.h"
 #include "activation.h"
 #include <malloc.h>
+#include "eval.h"
 
 
 #define MAX_CSV_READ 200000
 #define MNIST_INPUT_SIZE 784 //there are 784 pixels but 785 columns in csv: first column is label
 #define MNIST_OUTPUT_SIZE 10
-#define MNIST_TRAIN_SIZE 10000
-#define MNIST_TEST_SIZE 1000
+#define MNIST_TRAIN_SIZE 60000
+#define MNIST_TEST_SIZE 10000
 
 #define LEARNING_RATE 0.1
 
 #define BATCH_SIZE 32
-#define EPOCHS 100
+#define EPOCHS 20
 
 void print_csv(FILE* input_file){
 
@@ -78,27 +79,48 @@ int main(){
 
     FILE* csv_file = fopen("mnist_train.csv", "r");
 
+    FILE* csv_file_test = fopen("mnist_test.csv", "r");
     
     if(!csv_file){
-        fprintf(stderr, "Could not open dataset file \n");
+        fprintf(stderr, "Could not open train set file \n");
         exit(1);
     }
 
-    // print_csv(csv_file);
+    
+    if(!csv_file_test){
+        fprintf(stderr, "Could not open test set file \n");
+        exit(1);
+    }
 
-    // // fclose(csv_file);
 
     int* labels = calloc(MNIST_TRAIN_SIZE, sizeof(int));
 
+    int* test_labels =  calloc(MNIST_TEST_SIZE, sizeof(int));;
+
     if(!labels){
-        fprintf(stderr , "Failed to allocate %lld bytes of memory to store dataset labels \n", sizeof(int)*MNIST_TRAIN_SIZE);
+        fprintf(stderr , "Failed to allocate %lld bytes of memory to store training set labels \n", sizeof(int)*MNIST_TRAIN_SIZE);
         exit(1);
     }
 
+
+    
+    if(!test_labels){
+        fprintf(stderr , "Failed to allocate %lld bytes of memory to store test set labels \n", sizeof(int)*MNIST_TRAIN_SIZE);
+        exit(1);
+    }
+
+
     double** values = calloc(MNIST_TRAIN_SIZE, sizeof(double*));
 
+    double** test_values = calloc(MNIST_TEST_SIZE, sizeof(double*));
+
     if(!values){
-        fprintf(stderr , "Failed to allocate %lld bytes of memory for values \n", sizeof(int)*MNIST_TRAIN_SIZE);
+        fprintf(stderr , "Failed to allocate %lld bytes of memory for training values \n", sizeof(int)*MNIST_TRAIN_SIZE);
+        exit(1);
+    }
+
+    if(!test_values){
+        fprintf(stderr , "Failed to allocate %lld bytes of memory for testing values \n", sizeof(int)*MNIST_TEST_SIZE);
         exit(1);
     }
 
@@ -109,23 +131,31 @@ int main(){
             exit(1);
         }
     }
+
+    for(int i = 0; i < MNIST_TEST_SIZE; i++){
+        test_values[i] = calloc(MNIST_INPUT_SIZE, sizeof(double));
+        if(!test_values[i]){
+            fprintf(stderr , "Failed to allocate %lld bytes of memory for images\n", sizeof(int)*MNIST_INPUT_SIZE);
+            exit(1);
+        }
+    }
+
     
-
-    printf("Reading csv... ");
-
     read_csv_mnist(csv_file, labels, values);
+
+    read_csv_mnist(csv_file_test, test_labels, test_values);
 
     fclose(csv_file);
 
-    printf("Done\n");
+    fclose(csv_file_test);
 
     // for (size_t i = 0; i < 10; i++)
     // {
     //     printf("Label: %d Data: \n", labels[i]);
-    //     for (size_t j = 0; j < 10; j++)
-    //     {
-    //         printf("%d ", values[i][j]);
-    //     }
+    //     // for (size_t j = 0; j < 10; j++)
+    //     // {
+    //     //     printf("%lf ", values[i][j]);
+    //     // }
         
     // }
 
@@ -133,51 +163,50 @@ int main(){
 
     NN network;
 
-    printf("Creating NN \n");
 
     network = NN_create(MNIST_INPUT_SIZE,
      BATCH_SIZE,
      MNIST_OUTPUT_SIZE,
-     softmax,
-     categorical_cross_entropy
+     sigmoid_output,
+     mean_square_error
     );
-    printf("Created \n");
 
-    printf("Adding first layer \n");
 
-    NN_add_hidden(&network, 126, relu);
-    printf("Adding second layer \n");
-    NN_add_hidden(&network, 50, relu);
+    NN_add_hidden(&network, 126, sigmoid);
+    NN_add_hidden(&network, 126, sigmoid);
     // printf("Adding third layer \n");
     // NN_add_hidden(&network, 30, sigmoid);
 
-    printf("Done \nCompiling \n");
 
     NN_compile(&network);
 
     printf("Done! \n");
 
 
-    
-    // double** one_hots = to_onehot(32, labels); 
-
-    // printf("loss: %lf \n", NN_eval_loss(&network, one_hots));
-
-    printf("Let's gooooo \n");
-
     NN_fit_classification(&network, MNIST_TRAIN_SIZE, EPOCHS, values, labels, LEARNING_RATE);
 
 
-    Matrix* input = as_batch(BATCH_SIZE, MNIST_INPUT_SIZE, values, NULL);
+    matrix_render(network.outputs);
 
-    int* predictions = NN_predict_class_batch(&network, input);
+    int* predictions = NN_predict_class_all(&network, MNIST_TRAIN_SIZE - network.batch_size, values);
 
-    for (size_t i = 0; i < 10; i++)
-    {
-        printf("Prediction %lld: %d real %d\n",i,predictions[i], labels[i]);
-    }    
+    int* predictions_test = NN_predict_class_all(&network, MNIST_TEST_SIZE - network.batch_size, test_values);
+
+    double accuracy = NN_accuracy_score(MNIST_TRAIN_SIZE - network.batch_size, predictions, labels);
+
+    double real_accuracy = NN_accuracy_score(MNIST_TEST_SIZE - network.batch_size, predictions_test, test_labels);
+
+    printf("Train accuracy: %lf \n", accuracy);
+    
+    printf("Test accuracy: %lf \n", real_accuracy);
 
 
+
+    // for (size_t i = 0; i < 30; i++)
+    // {
+    //     printf("prediction: %d , real : %d \n", predictions[i], labels[i]);
+    // }
+    
 
     // for (size_t i = 0; i < network.hidden_layer_count; i++)
     // {      
@@ -190,17 +219,29 @@ int main(){
     // printf("Output layer weights \n");
     // matrix_render(network.output_layer_weights);
 
-    //-------------- cleanup -------------------------------
+    // -------------- cleanup -------------------------------
 
     // matrix_delete(input);
-    // free(predictions);
+    free(predictions);
+
+    free(predictions_test);
+   
     free(labels);
 
+    free(test_labels);
+    
     for(int i = 0; i < MNIST_TRAIN_SIZE; i++){
         free(values[i]);
     }
+    
+    for(int i = 0; i < MNIST_TEST_SIZE; i++){
+        free(test_values[i]);
+    }
+    
 
     free(values);
+    
+    free(test_values);
 
     return 0;
 }

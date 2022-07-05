@@ -7,7 +7,6 @@
 
 #define INITIAL_LAYER_CAPACITY 3
 
-#define LEARNING_RATE = 0.1
 
 #define WHITE "\033[0;37m"
 #define GREEN "\033[0;32m"
@@ -545,26 +544,58 @@ void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,dou
 }
 
 
-int* NN_predict_class_batch(NN* network, Matrix* input){
+int* NN_predict_class_batch(NN* network, Matrix* input, int* predictions){
 
     assert(input->nb_cols == network->inputs->nb_cols);
     assert(input->nb_rows == network->batch_size);
 
-    int* predictions = calloc(network->outputs->nb_cols, sizeof(int));
-
     if(!predictions){
-        fprintf(stderr, "Could not allocate memory for preficitions \n");
-        return NULL;
+
+        int* predictions = calloc(network->outputs->nb_cols, sizeof(int));
+        if(!predictions){
+            fprintf(stderr, "Could not allocate memory for preficitions \n");
+            return NULL;
+        }
     }
+
 
     NN_feed_foward(network, input);
     
-    matrix_render(network->outputs);
+    // matrix_render(network->outputs);
 
     for (size_t i = 0; i < network->batch_size; i++)
     {
         predictions[i] = matrix_argmax(network->outputs, 0, i);
     }
     
+    return predictions;
+}
+
+
+int* NN_predict_class_all(NN* network, size_t how_many, double** values){
+
+    Matrix* batch = NULL;
+    size_t batch_num;
+
+    int* predictions = calloc(how_many, sizeof(int));
+
+    if(!predictions){
+        fprintf(stderr, "Could not allocate memory for preficitions \n");
+        return NULL;
+    }
+
+    for (batch_num = 0; batch_num < how_many - network->batch_size ; batch_num += network->batch_size)
+    {
+        batch = as_batch(network->batch_size, network->inputs->nb_cols, &values[batch_num], batch);
+        NN_predict_class_batch(network, batch, &predictions[batch_num]);
+    }
+    
+    // for (size_t i = batch_num; i < how_many ; i++)
+    // {
+        
+    // }
+    
+    matrix_delete(batch);
+
     return predictions;
 }
