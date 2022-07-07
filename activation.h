@@ -10,7 +10,11 @@ typedef double (*Activation_derivative)(double);
 
 void relu(double* x);
 
+void leaky_relu(double* x);
+
 double d_relu(double x);
+
+double d_leaky_relu(double x);
 
 void sigmoid(double* x);
 

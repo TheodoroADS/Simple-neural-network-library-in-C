@@ -13,11 +13,18 @@
 #define CYAN "\033[0;36m"
 #define PURPLE "\033[0;35m"
 
-void foward(Hidden_layer layer,Matrix* input, Matrix* output){
+// #define GRADIENTS_MAX 10000
+// #define GRADIENTS_MIN -GRADIENTS_MAX
 
-    // printf(GREEN);
-    // printf("input: [%lld, %lld] weights: [%lld, %lld]\n", input->nb_rows, input->nb_cols, layer.weights.nb_rows, layer.weights.nb_cols);
-    // printf(WHITE);
+
+void Hidden_layer_free(Hidden_layer* layer){
+    Matrix_delete(layer->activation);
+    Matrix_delete(layer->values);
+    Matrix_delete(layer->weights);
+    free(layer);
+}
+
+void foward(Hidden_layer layer,Matrix* input, Matrix* output){
 
     matrix_mul(input,  &layer.weights, output);
     matrix_add(output, &layer.biases);
@@ -26,11 +33,11 @@ void foward(Hidden_layer layer,Matrix* input, Matrix* output){
 }
 
 
-NN NN_create(int input_size, int batch_size, int output_size, Output_Activation_func output_activation, Loss_func loss_function)
+NN* NN_create(int input_size, int batch_size, int output_size, Output_Activation_func output_activation, Loss_func loss_function)
 {
 
     Matrix *inputLayer , *outputLayer;
-    NN instance;
+    NN* instance = malloc(sizeof(NN));
 
     Hidden_layer** hiddenLayers;
 
@@ -53,22 +60,38 @@ NN NN_create(int input_size, int batch_size, int output_size, Output_Activation_
     }
 
 
-    instance.inputs = inputLayer;
-    instance.outputs = outputLayer;
-    instance.batch_size = batch_size;
-    instance.output_layer_weights = NULL;
-    instance.hidden_layers = hiddenLayers;
-    instance.hidden_layer_count = 0;
-    instance.allocated_layers = INITIAL_LAYER_CAPACITY;
-    instance.output_activation = output_activation;
-    instance.loss_function = loss_function;
-    instance.d_loss_function = d_loss;
-    instance.ready =0;
+    instance->inputs = inputLayer;
+    instance->outputs = outputLayer;
+    instance->batch_size = batch_size;
+    instance->output_layer_weights = NULL;
+    instance->hidden_layers = hiddenLayers;
+    instance->hidden_layer_count = 0;
+    instance->allocated_layers = INITIAL_LAYER_CAPACITY;
+    instance->output_activation = output_activation;
+    instance->loss_function = loss_function;
+    instance->d_loss_function = d_loss;
+    instance->ready =0;
 
 
     return instance;
 }
 
+void NN_free(NN* network){
+
+    matrix_delete(network->inputs);
+    matrix_delete(network->outputs);
+    matrix_delete(network->output_layer_weights);
+    
+    for (size_t i = 0; i < network->hidden_layer_count; i++)
+    {
+        Hidden_layer_free(network->hidden_layers[i]);
+    }
+    
+    free(network->hidden_layers);
+
+    free(network);
+    
+}
 
 static int ensure_capacity(NN* network, int new_capacity){
 
@@ -287,6 +310,25 @@ static inline void flip_gradients(Matrix** gradients1, Matrix** gradients2){
     *gradients2 = temp;
 }
 
+
+static void clip_gradients(Matrix* gradients, size_t gradients_size, double min, double max){
+
+    for (size_t i = 0; i < gradients->nb_rows ; i++){
+    
+        for (size_t j = 0; j < gradients_size ; j++)
+        {
+            if (gradients->data[i][j] > max){
+                gradients->data[i][j] = max;
+            } else if (gradients->data[i][j] < min){
+                gradients->data[i][j] = min;
+            }
+        }
+        
+    }
+
+}
+
+
 static void backpropagate(NN* network, double learning_rate,double** reference_vals, Matrix* layer_gradients_current, Matrix* layer_gradients_next ){
 
 
@@ -343,6 +385,8 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
             }
         } 
     }
+
+    // clip_gradients(layer_gradients_next, get_last_layer(network)->values.nb_cols, GRADIENTS_MIN, GRADIENTS_MAX);
 
     // matrix_render(layer_gradients_current);
     
@@ -436,6 +480,10 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
                     }
                 } 
             }
+
+            // clip_gradients(layer_gradients_next, previous_la     yer_activations->nb_cols, GRADIENTS_MIN, GRADIENTS_MAX);
+
+
 
         }
 
@@ -589,11 +637,6 @@ int* NN_predict_class_all(NN* network, size_t how_many, double** values){
         batch = as_batch(network->batch_size, network->inputs->nb_cols, &values[batch_num], batch);
         NN_predict_class_batch(network, batch, &predictions[batch_num]);
     }
-    
-    // for (size_t i = batch_num; i < how_many ; i++)
-    // {
-        
-    // }
     
     matrix_delete(batch);
 

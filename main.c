@@ -14,10 +14,10 @@
 #define MNIST_TRAIN_SIZE 60000
 #define MNIST_TEST_SIZE 10000
 
-#define LEARNING_RATE 0.1
+#define LEARNING_RATE 1
 
 #define BATCH_SIZE 32
-#define EPOCHS 20
+#define EPOCHS 25
 
 void print_csv(FILE* input_file){
 
@@ -149,20 +149,7 @@ int main(){
 
     fclose(csv_file_test);
 
-    // for (size_t i = 0; i < 10; i++)
-    // {
-    //     printf("Label: %d Data: \n", labels[i]);
-    //     // for (size_t j = 0; j < 10; j++)
-    //     // {
-    //     //     printf("%lf ", values[i][j]);
-    //     // }
-        
-    // }
-
-    
-
-    NN network;
-
+    NN* network;
 
     network = NN_create(MNIST_INPUT_SIZE,
      BATCH_SIZE,
@@ -172,29 +159,29 @@ int main(){
     );
 
 
-    NN_add_hidden(&network, 126, sigmoid);
-    NN_add_hidden(&network, 126, sigmoid);
+    NN_add_hidden(network, 126, leaky_relu);
+    NN_add_hidden(network, 126, leaky_relu);
     // printf("Adding third layer \n");
-    // NN_add_hidden(&network, 30, sigmoid);
+    NN_add_hidden(network, 32, leaky_relu);
 
 
-    NN_compile(&network);
+    NN_compile(network);
 
     printf("Done! \n");
 
 
-    NN_fit_classification(&network, MNIST_TRAIN_SIZE, EPOCHS, values, labels, LEARNING_RATE);
+    NN_fit_classification(network, MNIST_TRAIN_SIZE, EPOCHS, values, labels, LEARNING_RATE);
 
 
-    matrix_render(network.outputs);
+    matrix_render(network->outputs);
 
-    int* predictions = NN_predict_class_all(&network, MNIST_TRAIN_SIZE - network.batch_size, values);
+    int* predictions = NN_predict_class_all(network, MNIST_TRAIN_SIZE - network->batch_size, values);
 
-    int* predictions_test = NN_predict_class_all(&network, MNIST_TEST_SIZE - network.batch_size, test_values);
+    int* predictions_test = NN_predict_class_all(network, MNIST_TEST_SIZE - network->batch_size, test_values);
 
-    double accuracy = NN_accuracy_score(MNIST_TRAIN_SIZE - network.batch_size, predictions, labels);
+    double accuracy = NN_accuracy_score(MNIST_TRAIN_SIZE - network->batch_size, predictions, labels);
 
-    double real_accuracy = NN_accuracy_score(MNIST_TEST_SIZE - network.batch_size, predictions_test, test_labels);
+    double real_accuracy = NN_accuracy_score(MNIST_TEST_SIZE - network->batch_size, predictions_test, test_labels);
 
     printf("Train accuracy: %lf \n", accuracy);
     
@@ -242,6 +229,8 @@ int main(){
     free(values);
     
     free(test_values);
+
+    NN_free(network);
 
     return 0;
 }

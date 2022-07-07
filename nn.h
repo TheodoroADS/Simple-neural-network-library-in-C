@@ -15,11 +15,9 @@ typedef struct Hidden_layer{
 
 } Hidden_layer;
 
-
+void Hidden_layer_free(Hidden_layer* layer);
 
 void foward(Hidden_layer layer,Matrix* input, Matrix* output);
-
-
 
 typedef struct NN{
 
@@ -38,7 +36,9 @@ typedef struct NN{
 
 } NN;
 
-NN NN_create(int input_size, int batch_size, int output_size, void (*output_activation)(size_t ,double*), double (*loss_function)(size_t, double*, double*));
+NN* NN_create(int input_size, int batch_size, int output_size, void (*output_activation)(size_t ,double*), double (*loss_function)(size_t, double*, double*));
+
+void NN_free(NN* network);
 
 int NN_add_hidden(NN* network ,int layer_size, void (*layer_activation)(double*));
 int NN_compile(NN* network);

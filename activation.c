@@ -10,8 +10,26 @@ void relu(double* x){
     }
 }
 
+void leaky_relu(double* x){
+    if(*x < 0){
+        *x = 0.01 * (*x);
+    }
+}
+
 double d_relu(double x){
-   return  x <= 0 ? 0 : 1;
+   if (x < 0){
+       return 0.0;
+   }else{
+       return 1.0;
+   }
+}
+
+double d_leaky_relu(double x){
+    if(x <= 0){
+        return 0.01;
+    }else{
+        return 1.0;
+    }
 }
 
 static inline double sigmoid_func(double x){
@@ -68,6 +86,8 @@ Activation_derivative resolve_derivative(Activation_func func){
         return d_relu;
     } else if (func == sigmoid){
         return d_sigmoid;
+    }else if (func == leaky_relu){
+        return d_leaky_relu;
     } else{
         fprintf(stderr, "No derivative known for function provided \n");
         return NULL;

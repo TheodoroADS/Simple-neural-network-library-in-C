@@ -78,7 +78,6 @@ Matrix* matrix_zeros(size_t nb_rows, size_t nb_cols){
         
     }
 
-    // printf("jooj \n");    
     return mat;
     
 }
@@ -103,7 +102,7 @@ Matrix* as_vector(size_t dim, double* values){
 Matrix* as_batch(size_t batch_size, size_t dim, double** values, Matrix* batch){
 
     if(!batch){
-        printf("buceta \n");
+        
         batch = matrix_new(batch_size, dim);
 
         if(!batch){
