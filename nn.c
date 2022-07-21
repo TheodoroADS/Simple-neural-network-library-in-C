@@ -7,25 +7,27 @@
 
 #define INITIAL_LAYER_CAPACITY 3
 
+// #define debug
 
-#define WHITE "\033[0;37m"
-#define GREEN "\033[0;32m"
-#define CYAN "\033[0;36m"
-#define PURPLE "\033[0;35m"
+// #define grad_clip //for clipping the gradients
 
-// #define GRADIENTS_MAX 10000
-// #define GRADIENTS_MIN -GRADIENTS_MAX
 
+#ifdef grad_clip
+
+#define GRADIENTS_MAX 10000
+
+#define GRADIENTS_MIN -GRADIENTS_MAX
+
+#endif
 
 void Hidden_layer_free(Hidden_layer* layer){
-    Matrix_delete(layer->activation);
-    Matrix_delete(layer->values);
-    Matrix_delete(layer->weights);
+    matrix_delete(&layer->values);
+    matrix_delete(&layer->weights);
     free(layer);
 }
 
-void foward(Hidden_layer layer,Matrix* input, Matrix* output){
-
+static inline void foward(Hidden_layer layer,Matrix* input, Matrix* output){
+    
     matrix_mul(input,  &layer.weights, output);
     matrix_add(output, &layer.biases);
     matrix_apply(output, layer.activation);
@@ -43,7 +45,13 @@ NN* NN_create(int input_size, int batch_size, int output_size, Output_Activation
 
     Loss_derivative d_loss = get_loss_derivative(loss_function);
 
+    Output_Activation_derivative d_out = resolve_out_derivative(output_activation);
+
     if(!d_loss){
+        exit(1);
+    }
+
+    if(!d_out){
         exit(1);
     }
 
@@ -68,6 +76,7 @@ NN* NN_create(int input_size, int batch_size, int output_size, Output_Activation
     instance->hidden_layer_count = 0;
     instance->allocated_layers = INITIAL_LAYER_CAPACITY;
     instance->output_activation = output_activation;
+    instance->d_output_activation = d_out;
     instance->loss_function = loss_function;
     instance->d_loss_function = d_loss;
     instance->ready =0;
@@ -311,6 +320,8 @@ static inline void flip_gradients(Matrix** gradients1, Matrix** gradients2){
 }
 
 
+#ifdef grad_clip
+
 static void clip_gradients(Matrix* gradients, size_t gradients_size, double min, double max){
 
     for (size_t i = 0; i < gradients->nb_rows ; i++){
@@ -328,6 +339,7 @@ static void clip_gradients(Matrix* gradients, size_t gradients_size, double min,
 
 }
 
+#endif
 
 static void backpropagate(NN* network, double learning_rate,double** reference_vals, Matrix* layer_gradients_current, Matrix* layer_gradients_next ){
 
@@ -344,7 +356,11 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
     {
         for (size_t value = 0; value < gradients_size ; value++)
         {
-            layer_gradients_current->data[example][value] = 2 * (network->outputs->data[example][value] - reference_vals[example][value]) * d_sigmoid(network->outputs->data[example][value]); 
+            layer_gradients_current->data[example][value] = //network->outputs->data[example][value] - reference_vals[example][value]; 
+              network->d_loss_function(network->outputs->nb_cols, 
+              network->outputs->data[example],
+              reference_vals[example],
+              value) * network->d_output_activation(network->outputs->data[example][value]); 
         }
     }
 
@@ -369,7 +385,6 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
     
 
 
-
     //computing gradients for the last hidden layer's activations
     //NOTE: inside of layer_gradients_current[i] is dactivation[i]/Z[i] * dloss/dactivaton[i] because of specific case of CCE + softmax
     for (size_t activation = 0; activation < get_last_layer(network)->values.nb_cols; activation++)
@@ -386,11 +401,18 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
         } 
     }
 
-    // clip_gradients(layer_gradients_next, get_last_layer(network)->values.nb_cols, GRADIENTS_MIN, GRADIENTS_MAX);
+    #ifdef grad_clip
 
-    // matrix_render(layer_gradients_current);
+    clip_gradients(layer_gradients_next, get_last_layer(network)->values.nb_cols, GRADIENTS_MIN, GRADIENTS_MAX);
+
+    #endif
+
+    #ifdef debug
+
+    matrix_render(layer_gradients_current);
     
-    
+    #endif
+
     //flipping gradients arrays
     flip_gradients(&layer_gradients_current, &layer_gradients_next);
 
@@ -425,8 +447,11 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
 
         }
         
+        #ifdef debug
 
-        // matrix_render(layer_gradients_current);
+        matrix_render(layer_gradients_current);
+
+        #endif
 
         //adjusting biases
         for (size_t i = 0; i < layer->biases.nb_cols; i++)
@@ -481,9 +506,11 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
                 } 
             }
 
-            // clip_gradients(layer_gradients_next, previous_la     yer_activations->nb_cols, GRADIENTS_MIN, GRADIENTS_MAX);
+            #ifdef grad_clip
 
+            clip_gradients(layer_gradients_next, previous_layer_activations->nb_cols, GRADIENTS_MIN, GRADIENTS_MAX);
 
+            #endif
 
         }
 
@@ -504,6 +531,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
         //     printf("%lf ", layer_gradients_current[cock]);
         // }
         
+
         flip_gradients(&layer_gradients_current, &layer_gradients_next);
         
 
@@ -562,7 +590,27 @@ void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,dou
             
             NN_feed_foward(network, batch);
 
-            // matrix_render(network->outputs);
+            #ifdef debug
+
+            matrix_render(network->outputs);
+
+            printf("output layer weights: \n");
+
+            matrix_render(network->output_layer_weights);
+
+            printf("last hidden layer activations: \n");
+
+            matrix_render(&get_last_layer(network)->values);
+
+            printf("last hidden layer biases: \n");
+
+            matrix_render(&get_last_layer(network)->biases);
+
+            printf("last hidden layer weights: \n");
+
+            matrix_render(&get_last_layer(network)->weights);
+
+            #endif
 
 
             loss = NN_eval_loss(network, &values[batch_num]);
@@ -619,6 +667,20 @@ int* NN_predict_class_batch(NN* network, Matrix* input, int* predictions){
     return predictions;
 }
 
+int NN_predict_class(NN* network, double* X){
+
+    Matrix* batch = matrix_random(network->batch_size, network->inputs->nb_cols);
+
+    for (size_t i = 0; i < network->inputs->nb_cols; i++){
+        batch->data[0][i] = X[i];
+    }
+
+    NN_feed_foward(network, batch);
+
+    matrix_delete(batch);
+
+    return matrix_argmax(network->outputs, 0, 0);
+}
 
 int* NN_predict_class_all(NN* network, size_t how_many, double** values){
 
@@ -637,6 +699,21 @@ int* NN_predict_class_all(NN* network, size_t how_many, double** values){
         batch = as_batch(network->batch_size, network->inputs->nb_cols, &values[batch_num], batch);
         NN_predict_class_batch(network, batch, &predictions[batch_num]);
     }
+
+    // size_t remaining = how_many - batch_num;
+
+    // assert(remaining == network->batch_size);
+
+    // for (size_t i = 0; i < remaining ; i++)
+    // {
+    //     for (size_t j = 0; j < network->inputs->nb_cols; j++)
+    //     {
+    //         batch->data[i][j] = values[batch_num + i][j];
+    //     }
+        
+    // }
+    
+    printf("Batch num : %lld, nb of examples: %lld \n", batch_num, how_many );
     
     matrix_delete(batch);
 

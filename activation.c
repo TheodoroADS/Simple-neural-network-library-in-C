@@ -4,6 +4,8 @@
 #include "loss.h"
 
 
+#define LEAKY_RELU_COEF 0.1
+
 void relu(double* x){
     if(*x < 0){
         *x = 0;
@@ -12,7 +14,7 @@ void relu(double* x){
 
 void leaky_relu(double* x){
     if(*x < 0){
-        *x = 0.01 * (*x);
+        *x *= LEAKY_RELU_COEF;
     }
 }
 
@@ -26,7 +28,7 @@ double d_relu(double x){
 
 double d_leaky_relu(double x){
     if(x <= 0){
-        return 0.01;
+        return LEAKY_RELU_COEF;
     }else{
         return 1.0;
     }
@@ -52,7 +54,6 @@ void sigmoid_output(size_t nb_values, double* values){
 double d_sigmoid(double x){
     // double sigm = sigmoid_func(x);
 
-    //return sigm*(1-sigm);
     return x*(1.0-x);
 }
 
@@ -61,11 +62,12 @@ void softmax(size_t nb_values , double* values){
 
     double exp_sum = 0;
 
-    clip(nb_values, values, CLIP_MIN, CLIP_MAX);
+//    clip(nb_values, values, CLIP_MIN, CLIP_MAX);
 
     for (size_t i = 0; i < nb_values; i++)
     {   
         values[i] = exp(values[i]);
+        // printf("exp %lf \n", values[i]);
         exp_sum += values[i];
     }
     
@@ -74,6 +76,12 @@ void softmax(size_t nb_values , double* values){
         values[i] /= exp_sum;
     }
 
+
+}
+
+double d_softmax(double x){
+
+    return x*(1.0-x);
 
 }
 
@@ -90,6 +98,19 @@ Activation_derivative resolve_derivative(Activation_func func){
         return d_leaky_relu;
     } else{
         fprintf(stderr, "No derivative known for function provided \n");
+        return NULL;
+    }
+
+}
+
+Output_Activation_derivative resolve_out_derivative(Output_Activation_func func){
+
+    if(func == sigmoid_output){
+        return d_sigmoid;
+    }else if (func == softmax){
+        return d_softmax;
+    }else{
+        fprintf(stderr, "No derivative known for given output activation functions \n");
         return NULL;
     }
 

@@ -14,10 +14,10 @@
 #define MNIST_TRAIN_SIZE 60000
 #define MNIST_TEST_SIZE 10000
 
-#define LEARNING_RATE 1
+#define LEARNING_RATE 0.1
 
 #define BATCH_SIZE 32
-#define EPOCHS 25
+#define EPOCHS 30
 
 void print_csv(FILE* input_file){
 
@@ -159,15 +159,16 @@ int main(){
     );
 
 
-    NN_add_hidden(network, 126, leaky_relu);
-    NN_add_hidden(network, 126, leaky_relu);
+    // NN_add_hidden(network, 126, relu);
+    NN_add_hidden(network, 126, sigmoid);
+    NN_add_hidden(network, 126, sigmoid);
+    // NN_add_hidden(network, 256, relu);
+    // NN_add_hidden(network, 126, relu);
     // printf("Adding third layer \n");
-    NN_add_hidden(network, 32, leaky_relu);
+    // NN_add_hidden(network, 32, relu);
 
 
     NN_compile(network);
-
-    printf("Done! \n");
 
 
     NN_fit_classification(network, MNIST_TRAIN_SIZE, EPOCHS, values, labels, LEARNING_RATE);
@@ -188,6 +189,7 @@ int main(){
     printf("Test accuracy: %lf \n", real_accuracy);
 
 
+    printf("joojinho: prediction %d real %d", NN_predict_class(network, values[0]) ,labels[0]); 
 
     // for (size_t i = 0; i < 30; i++)
     // {

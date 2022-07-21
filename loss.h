@@ -1,8 +1,8 @@
 #pragma once
 #include <stddef.h>
 
-#define CLIP_MIN 0.0000001
-#define CLIP_MAX 0.9999999
+#define CLIP_MIN 0.00001
+#define CLIP_MAX 0.99999
 
 typedef double (*Loss_func)(size_t, double*, double*);
 
