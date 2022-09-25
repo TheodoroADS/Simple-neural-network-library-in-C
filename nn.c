@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "loss.h"
 #include <assert.h> 
+#include "optimizer.h"
 
 #define INITIAL_LAYER_CAPACITY 3
 
@@ -67,6 +68,8 @@ NN* NN_create(int input_size, int batch_size, int output_size, Output_Activation
         exit(1);
     }
 
+    Optimizer opt = NN_get_optimizer(d_out, d_loss);
+
 
     instance->inputs = inputLayer;
     instance->outputs = outputLayer;
@@ -76,9 +79,8 @@ NN* NN_create(int input_size, int batch_size, int output_size, Output_Activation
     instance->hidden_layer_count = 0;
     instance->allocated_layers = INITIAL_LAYER_CAPACITY;
     instance->output_activation = output_activation;
-    instance->d_output_activation = d_out;
     instance->loss_function = loss_function;
-    instance->d_loss_function = d_loss;
+    instance->optimizer = opt;
     instance->ready =0;
 
 
@@ -336,6 +338,8 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
 
     size_t gradients_size = network->outputs->nb_cols;
 
+    Optimizer optimizer = network->optimizer;
+
     // matrix_render(network->outputs);
 
     //---------- output layer gradients ----------------------------
@@ -346,9 +350,8 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
     {
         for (size_t value = 0; value < gradients_size ; value++)
         {
-            layer_gradients_current->data[example][value] = //network->outputs->data[example][value] - reference_vals[example][value]; 
-              network->d_loss_function(network->outputs->data[example][value], reference_vals[example][value])
-            * network->d_output_activation(network->outputs->data[example][value]); 
+            layer_gradients_current->data[example][value] = 
+            optimizer.gradient_generator(&optimizer,network->outputs->data[example][value], reference_vals[example][value]);
         }
     }
 

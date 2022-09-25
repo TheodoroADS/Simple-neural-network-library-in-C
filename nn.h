@@ -3,7 +3,7 @@
 #include "matrix.h"
 #include "activation.h"
 #include "loss.h"
-
+#include "optimizer.h"
 
 typedef struct Hidden_layer{
 
@@ -17,7 +17,7 @@ typedef struct Hidden_layer{
 
 void Hidden_layer_free(Hidden_layer* layer);
 
-// void foward(Hidden_layer layer,Matrix* input, Matrix* output);
+
 
 typedef struct NN{
 
@@ -29,9 +29,8 @@ typedef struct NN{
     int hidden_layer_count;
     int allocated_layers;
     Output_Activation_func output_activation;
-    Output_Activation_derivative d_output_activation;
     Loss_func loss_function;
-    Loss_derivative d_loss_function;
+    Optimizer optimizer;
     int ready;
 
 

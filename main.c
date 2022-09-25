@@ -75,7 +75,7 @@ void read_csv_mnist(FILE* input_file, int* labels, double** values){
 
 
 
-int main(){
+int main(void){
 
     FILE* csv_file = fopen("mnist_train.csv", "r");
 
@@ -154,8 +154,8 @@ int main(){
     network = NN_create(MNIST_INPUT_SIZE,
      BATCH_SIZE,
      MNIST_OUTPUT_SIZE,
-     sigmoid_output,
-     mean_square_error
+     softmax,
+     categorical_cross_entropy
     );
 
 

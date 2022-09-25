@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS= -Wall -Wextra --pedantic-errors -O3
 
-nn: main.o matrix.o nn.o activation.o loss.o eval.o
+nn: main.o matrix.o nn.o activation.o loss.o optimizer.o eval.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 # matrix: matrix.o
@@ -16,7 +16,10 @@ loss.o: loss.c loss.h matrix.h
 activation.o: activation.c activation.h
 	$(CC) $(CFLAGS) -c $<
 
-nn.o: nn.c matrix.h nn.h loss.h
+optimizer.o: optimizer.c optimizer.h
+	$(CC) $(CFLAGS) -c $<
+
+nn.o: nn.c matrix.h nn.h loss.h optimizer.h
 	$(CC) $(CFLAGS) -c $<
 
 eval.o: eval.c eval.h
