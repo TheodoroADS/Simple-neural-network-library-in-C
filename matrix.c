@@ -8,20 +8,17 @@
 
 Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
 
-    // printf("Eita porra caralho novinha \n");
 
     assert(nb_rows > 0 && nb_cols > 0);
 
     Matrix* mat = malloc(sizeof(Matrix));
 
-    // printf("Filha da \n");
 
     if (!mat){
         printf("Error in allocating matrix %s \n",strerror(errno));
         return NULL;
     }   
 
-    // printf("putinha \n");
 
     mat->data = calloc(nb_rows,sizeof(double*));
 
@@ -35,10 +32,10 @@ Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
 
 
     for(size_t i = 0 ; i < nb_rows;  i ++){
-        // printf("Caralhinho %lld \n", i);
+
         mat->data[i] = calloc(nb_cols, sizeof(double));
         if (!mat->data[i]){
-            printf("bundinha\n");
+            
             for (int j = 0; j < i ; j ++){
                 free(mat->data[i]);
             }
@@ -49,7 +46,6 @@ Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
         }
     }
     mat->nb_cols= nb_cols;
-    // printf("cocok \n");
 
     return mat;
 

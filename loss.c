@@ -32,9 +32,9 @@ double mean_square_error(size_t size, double* layer_values, double* reference_va
     return total_square_error / ( (double) size);
 }
 
-double d_mean_square_error(size_t size, double* layer_values, double* reference_values, size_t neuron_index ){
+double d_mean_square_error(double layer_value, double reference_value ){
 
-    return 2*(layer_values[neuron_index] - reference_values[neuron_index]);
+    return 2*(layer_value - reference_value);
 }
 
 double categorical_cross_entropy(size_t size, double* layer_values, double* reference_values){
@@ -63,8 +63,8 @@ double categorical_cross_entropy(size_t size, double* layer_values, double* refe
     return loss;
 }
 
-double d_categorical_cross_entropy(size_t size,double* layer_values, double* reference_values, size_t neuron_index){
-    return reference_values[neuron_index]/layer_values[neuron_index];
+double d_categorical_cross_entropy(double layer_value, double reference_value){
+    return reference_value /layer_value;
 }
 
 Loss_derivative get_loss_derivative(Loss_func lossFunc){
@@ -82,5 +82,6 @@ Loss_derivative get_loss_derivative(Loss_func lossFunc){
         return NULL;
 
     }
+    
 
 }

@@ -198,7 +198,6 @@ int NN_compile(NN* network){
     return 1;
 }
 
-//TODO create function to free network memory
 
 static void NN_feed_foward(NN* network, Matrix* input){
 
@@ -283,15 +282,6 @@ static double** to_onehot(size_t batch_size, size_t output_size ,int* labels, do
 
     }
 
-    // printf("jooj \n");
-    // for (size_t i = 0; i < batch_size; i++)
-    // {
-    //     printf("%d ", labels[i]);
-    // }
-    
-    // printf("ceec \n");
-
-
 
     for (size_t i = 0; i < batch_size; i++)
     {
@@ -357,10 +347,8 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
         for (size_t value = 0; value < gradients_size ; value++)
         {
             layer_gradients_current->data[example][value] = //network->outputs->data[example][value] - reference_vals[example][value]; 
-              network->d_loss_function(network->outputs->nb_cols, 
-              network->outputs->data[example],
-              reference_vals[example],
-              value) * network->d_output_activation(network->outputs->data[example][value]); 
+              network->d_loss_function(network->outputs->data[example][value], reference_vals[example][value])
+            * network->d_output_activation(network->outputs->data[example][value]); 
         }
     }
 
@@ -638,7 +626,6 @@ void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,dou
     free(one_hots);
 
 }
-
 
 int* NN_predict_class_batch(NN* network, Matrix* input, int* predictions){
 
