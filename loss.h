@@ -1,8 +1,9 @@
 #pragma once
 #include <stddef.h>
 
-#define CLIP_MIN 0.00001
-#define CLIP_MAX 0.99999
+#define EPSILON 0.0000001
+#define CLIP_MIN EPSILON
+#define CLIP_MAX 1 - EPSILON
 
 typedef double (*Loss_func)(size_t, double*, double*);
 

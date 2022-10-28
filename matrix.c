@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "matrix.h"
 #include <string.h>
+#include <omp.h>
 
 Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
 
@@ -155,6 +156,7 @@ void matrix_delete(Matrix* mat){
 
 void matrix_apply(Matrix* mat, void (*func)(double*)){
 
+    #pragma omp for
     for (size_t i = 0; i < mat->nb_rows; i++)
     {
         for (size_t j = 0; j < mat->nb_cols; j++)
@@ -169,6 +171,7 @@ void matrix_apply(Matrix* mat, void (*func)(double*)){
 
 void matrix_apply_rows(Matrix* mat,void (*func)(size_t, double*)){
 
+    #pragma omp for
     for (size_t i = 0; i < mat->nb_rows; i++)
     {
         func(mat->nb_cols, mat->data[i]);
@@ -204,8 +207,9 @@ void matrix_mul(Matrix* A, Matrix* B, Matrix* Res){
     assert(A->nb_cols == B->nb_rows);
     assert(A->nb_rows == Res->nb_rows && B->nb_cols == Res->nb_cols);
 
+    #pragma omp for
     for (size_t i = 0; i < A->nb_rows; i++)
-    {
+    {   
         for (size_t j = 0; j < B->nb_cols; j++)
         {   
             Res->data[i][j] = 0;
@@ -226,7 +230,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
     // printf("Matrix add: [%lld, %lld] + [%lld, %lld] \n",
     //  M1->nb_rows, M1->nb_cols, M2->nb_rows, M2->nb_cols);
 
-
+    #pragma omp for
     if(M1->nb_cols == M2->nb_cols && M1->nb_rows == M2->nb_rows){
 
         for (size_t i = 0; i < M1->nb_rows; i++)
@@ -242,7 +246,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
     }else if (M2->nb_cols == 1){
         assert(M1->nb_rows == M2->nb_rows);
 
-
+        #pragma omp for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)
@@ -256,6 +260,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
 
         assert(M1->nb_cols == M2->nb_cols);
 
+        #pragma omp for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)

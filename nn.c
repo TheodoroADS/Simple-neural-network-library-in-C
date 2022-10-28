@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "loss.h"
 #include <assert.h> 
+#include <omp.h>
 #include "optimizer.h"
 
 #define INITIAL_LAYER_CAPACITY 3
@@ -269,6 +270,7 @@ static double** to_onehot(size_t batch_size, size_t output_size ,int* labels, do
             exit(1);
         }
 
+        #pragma omp for
         for (size_t i = 0; i < batch_size; i++)
         {
             vectors[i] = calloc(output_size, sizeof(double));
@@ -284,7 +286,7 @@ static double** to_onehot(size_t batch_size, size_t output_size ,int* labels, do
 
     }
 
-
+    #pragma omp for
     for (size_t i = 0; i < batch_size; i++)
     {
         for (size_t j = 0; j < output_size; j++)
@@ -346,6 +348,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
 
     
     //calculating dloss/dy * dy/dz 
+    #pragma omp for
     for (size_t example = 0; example < network->outputs->nb_rows ; example++)
     {
         for (size_t value = 0; value < gradients_size ; value++)
@@ -357,6 +360,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
 
 
     //updating output weights
+    #pragma omp for 
     for (size_t i = 0; i < network->output_layer_weights->nb_rows; i++)
     {
         for (size_t j = 0; j < network->output_layer_weights->nb_cols; j++)
@@ -378,6 +382,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
 
     //computing gradients for the last hidden layer's activations
     //NOTE: inside of layer_gradients_current[i] is dactivation[i]/Z[i] * dloss/dactivaton[i] because of specific case of CCE + softmax
+    #pragma omp for
     for (size_t activation = 0; activation < get_last_layer(network)->values.nb_cols; activation++)
     {
 
@@ -427,7 +432,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
 
         gradients_size = layer->values.nb_cols;
 
-
+        #pragma omp for
         for (size_t i = 0; i < gradients_size; i++)
         {
 
@@ -445,6 +450,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
         #endif
 
         //adjusting biases
+        #pragma omp for
         for (size_t i = 0; i < layer->biases.nb_cols; i++)
         {
             double bias_adjustment = 0;
@@ -460,6 +466,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
         
 
         //adjusting weights
+        #pragma omp for
         for (size_t i = 0; i < layer->weights.nb_rows; i++)
         {
             for (size_t j = 0; j < layer->weights.nb_cols; j++)

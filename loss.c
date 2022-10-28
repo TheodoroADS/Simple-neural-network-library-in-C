@@ -49,12 +49,12 @@ double categorical_cross_entropy(size_t size, double* layer_values, double* refe
     for (size_t i = 0; i < size; i++)
     {
 
-        if(layer_values[i] <= 0.0){
-            // layer_values[i] = 0.001;
+        // if(layer_values[i] <= 0.0){
+        //     // layer_values[i] = 0.001;
 
-            printf("Fudeeeeeeu %lf \n", layer_values[i]);
+        //     printf("Fudeeeeeeu %lf \n", layer_values[i]);
         
-        }
+        // }
 
         loss -= reference_values[i]*log(layer_values[i]);
     }
