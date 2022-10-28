@@ -55,10 +55,8 @@ Matrix* matrix_zeros(size_t nb_rows, size_t nb_cols){
 
     Matrix* mat = matrix_new(nb_rows, nb_cols);
 
-    // printf("zeez \n");
 
     if (!mat){
-        printf("juuj \n");
         return NULL;
     }
 

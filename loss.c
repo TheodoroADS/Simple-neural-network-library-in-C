@@ -26,7 +26,7 @@ double mean_square_error(size_t size, double* layer_values, double* reference_va
     for (size_t i = 0; i < size; i++)
     {
         err = reference_values[i] - layer_values[i];
-        total_square_error = err*err;
+        total_square_error += err*err;
     }
     
     return total_square_error / ( (double) size);
