@@ -36,25 +36,25 @@ typedef struct NN{
 
 } NN;
 
-NN* NN_create(int input_size, int batch_size, int output_size, void (*output_activation)(size_t ,double*), double (*loss_function)(size_t, double*, double*));
+NN* NN_create(int input_size, int batch_size, int output_size, void (*output_activation)(size_t ,float*), float (*loss_function)(size_t, float*, float*));
 
 void NN_free(NN* network);
 
-int NN_add_hidden(NN* network ,int layer_size, void (*layer_activation)(double*));
+int NN_add_hidden(NN* network ,int layer_size, void (*layer_activation)(float*));
 
 int NN_compile(NN* network);
 
 // void NN_feed_foward(NN* network, Matrix* input);
 
-double NN_eval_loss(NN* network, double** reference_vals);
+float NN_eval_loss(NN* network, float** reference_vals);
 
 
-void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,double** values, int* labels, double learning_rate);
+void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,float** values, int* labels, float learning_rate);
 
 int* NN_predict_class_batch(NN* network, Matrix* input, int* predictions);
 
-int NN_predict_class(NN* network, double* X);
+int NN_predict_class(NN* network, float* X);
 
-int* NN_predict_class_all(NN* network, size_t how_many, double** values);
+int* NN_predict_class_all(NN* network, size_t how_many, float** values);
 
 

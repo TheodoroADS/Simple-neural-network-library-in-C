@@ -41,7 +41,7 @@ void print_csv(FILE* input_file){
 }
 
 
-void read_csv_mnist(FILE* input_file, int* labels, double** values){
+void read_csv_mnist(FILE* input_file, int* labels, float** values){
 
 
     int row = 0;            
@@ -61,7 +61,7 @@ void read_csv_mnist(FILE* input_file, int* labels, double** values){
         col = 0;
 
         while(value != NULL){
-            values[row][col] = ((double) atoi(value))/255;
+            values[row][col] = ((float) atoi(value))/255;
             value = strtok(NULL, ",");
             col++;
         }   
@@ -110,9 +110,9 @@ int main(void){
     }
 
 
-    double** values = calloc(MNIST_TRAIN_SIZE, sizeof(double*));
+    float** values = calloc(MNIST_TRAIN_SIZE, sizeof(float*));
 
-    double** test_values = calloc(MNIST_TEST_SIZE, sizeof(double*));
+    float** test_values = calloc(MNIST_TEST_SIZE, sizeof(float*));
 
     if(!values){
         fprintf(stderr , "Failed to allocate %lld bytes of memory for training values \n", sizeof(int)*MNIST_TRAIN_SIZE);
@@ -125,7 +125,7 @@ int main(void){
     }
 
     for(int i = 0; i < MNIST_TRAIN_SIZE; i++){
-        values[i] = calloc(MNIST_INPUT_SIZE, sizeof(double));
+        values[i] = calloc(MNIST_INPUT_SIZE, sizeof(float));
         if(!values[i]){
             fprintf(stderr , "Failed to allocate %lld bytes of memory for images\n", sizeof(int)*MNIST_INPUT_SIZE);
             exit(1);
@@ -133,7 +133,7 @@ int main(void){
     }
 
     for(int i = 0; i < MNIST_TEST_SIZE; i++){
-        test_values[i] = calloc(MNIST_INPUT_SIZE, sizeof(double));
+        test_values[i] = calloc(MNIST_INPUT_SIZE, sizeof(float));
         if(!test_values[i]){
             fprintf(stderr , "Failed to allocate %lld bytes of memory for images\n", sizeof(int)*MNIST_INPUT_SIZE);
             exit(1);
@@ -180,9 +180,9 @@ int main(void){
 
     int* predictions_test = NN_predict_class_all(network, MNIST_TEST_SIZE - network->batch_size, test_values);
 
-    double accuracy = NN_accuracy_score(MNIST_TRAIN_SIZE - network->batch_size, predictions, labels);
+    float accuracy = NN_accuracy_score(MNIST_TRAIN_SIZE - network->batch_size, predictions, labels);
 
-    double real_accuracy = NN_accuracy_score(MNIST_TEST_SIZE - network->batch_size, predictions_test, test_labels);
+    float real_accuracy = NN_accuracy_score(MNIST_TEST_SIZE - network->batch_size, predictions_test, test_labels);
 
     printf("Train accuracy: %lf \n", accuracy);
     

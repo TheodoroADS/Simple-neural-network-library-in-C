@@ -1,12 +1,12 @@
 #include "optimizer.h"
 
 
-double optimizer_default(Optimizer* opt , double layer_val, double reference_val){
+float optimizer_default(Optimizer* opt , float layer_val, float reference_val){
     return opt->loss_d(layer_val, reference_val) * opt->out_activation_d(layer_val);
 }
 
 
-double optimizer_cce_and_softmax(Optimizer* opt , double layer_val, double reference_val){
+float optimizer_cce_and_softmax(Optimizer* opt , float layer_val, float reference_val){
     return  layer_val - reference_val;
 }
 

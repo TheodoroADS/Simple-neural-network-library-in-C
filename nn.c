@@ -220,11 +220,11 @@ static void NN_feed_foward(NN* network, Matrix* input){
 
 }
 
-double NN_eval_loss(NN* network, double** reference_vals){
+float NN_eval_loss(NN* network, float** reference_vals){
 
     assert(network->ready);
 
-    double loss = 0;
+    float loss = 0;
 
 
     for(size_t i = 0; i < network->batch_size; i++){
@@ -258,12 +258,12 @@ static size_t get_gradients_matrix_size(NN* network){
 
 
 
-static double** to_onehot(size_t batch_size, size_t output_size ,int* labels, double** vectors){
+static float** to_onehot(size_t batch_size, size_t output_size ,int* labels, float** vectors){
 
 
     if(!vectors){
         
-        vectors = calloc(batch_size, sizeof(double*));
+        vectors = calloc(batch_size, sizeof(float*));
         
         if(!vectors){
             fprintf(stderr ,"Could not allocate vectors array for one hot representation \n");
@@ -273,7 +273,7 @@ static double** to_onehot(size_t batch_size, size_t output_size ,int* labels, do
         #pragma omp for
         for (size_t i = 0; i < batch_size; i++)
         {
-            vectors[i] = calloc(output_size, sizeof(double));
+            vectors[i] = calloc(output_size, sizeof(float));
 
             if (!vectors[i])
             {
@@ -316,7 +316,7 @@ static inline void flip_gradients(Matrix** gradients1, Matrix** gradients2){
 
 #ifdef grad_clip
 
-static void clip_gradients(Matrix* gradients, size_t gradients_size, double min, double max){
+static void clip_gradients(Matrix* gradients, size_t gradients_size, float min, float max){
 
     for (size_t i = 0; i < gradients->nb_rows ; i++){
     
@@ -335,7 +335,7 @@ static void clip_gradients(Matrix* gradients, size_t gradients_size, double min,
 
 #endif
 
-static void backpropagate(NN* network, double learning_rate,double** reference_vals, Matrix* layer_gradients_current, Matrix* layer_gradients_next ){
+static void backpropagate(NN* network, float learning_rate,float** reference_vals, Matrix* layer_gradients_current, Matrix* layer_gradients_next ){
 
 
     size_t gradients_size = network->outputs->nb_cols;
@@ -365,7 +365,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
     {
         for (size_t j = 0; j < network->output_layer_weights->nb_cols; j++)
         {
-            double adjustment = 0;
+            float adjustment = 0;
             
             for (size_t k = 0; k < network->batch_size; k++)
             {
@@ -453,7 +453,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
         #pragma omp for
         for (size_t i = 0; i < layer->biases.nb_cols; i++)
         {
-            double bias_adjustment = 0;
+            float bias_adjustment = 0;
 
             for (size_t j = 0; j < network->batch_size; j++)
             {
@@ -471,7 +471,7 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
         {
             for (size_t j = 0; j < layer->weights.nb_cols; j++)
             {
-                double adjustment = 0;
+                float adjustment = 0;
                 
                 for (size_t k = 0; k < network->batch_size; k++)
                 {
@@ -539,12 +539,12 @@ static void backpropagate(NN* network, double learning_rate,double** reference_v
 
 
 
-void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,double** values, int* labels, double learning_rate){
+void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,float** values, int* labels, float learning_rate){
 
     size_t layer_gradients_size = get_gradients_matrix_size(network);
     Matrix* layer_gradients_current =  matrix_new(network->batch_size, layer_gradients_size);
     Matrix* layer_gradients_next =  matrix_new(network->batch_size, layer_gradients_size);
-    double** one_hots = NULL;
+    float** one_hots = NULL;
     Matrix* batch = NULL;
 
     if(!layer_gradients_current || !layer_gradients_next){
@@ -558,8 +558,8 @@ void NN_fit_classification(NN* network,size_t nb_examples ,size_t nb_epochs ,dou
 
         int* labels_ptr;
 
-        double average_loss = 0;
-        double loss;
+        float average_loss = 0;
+        float loss;
 
         for (size_t batch_num = 0; batch_num < nb_examples - network->batch_size; batch_num += network->batch_size)
         {   
@@ -664,7 +664,7 @@ int* NN_predict_class_batch(NN* network, Matrix* input, int* predictions){
     return predictions;
 }
 
-int NN_predict_class(NN* network, double* X){
+int NN_predict_class(NN* network, float* X){
 
     Matrix* batch = matrix_random(network->batch_size, network->inputs->nb_cols);
 
@@ -679,7 +679,7 @@ int NN_predict_class(NN* network, double* X){
     return matrix_argmax(network->outputs, 0, 0);
 }
 
-int* NN_predict_class_all(NN* network, size_t how_many, double** values){
+int* NN_predict_class_all(NN* network, size_t how_many, float** values){
 
     Matrix* batch = NULL;
     size_t batch_num;

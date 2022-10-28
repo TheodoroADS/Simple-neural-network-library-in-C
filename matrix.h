@@ -6,7 +6,7 @@ typedef struct{
 
     size_t nb_rows;
     size_t nb_cols;
-    double** data;
+    float** data;
 
 } Matrix;
 
@@ -16,15 +16,15 @@ Matrix* matrix_zeros( size_t nb_rows , size_t nb_cols);
 
 Matrix* matrix_random( size_t nb_rows , size_t nb_cols);
 
-Matrix* as_vector(size_t dim, double* values);
+Matrix* as_vector(size_t dim, float* values);
 
-Matrix* as_batch(size_t batch_size, size_t dim , double** values, Matrix* batch);
+Matrix* as_batch(size_t batch_size, size_t dim , float** values, Matrix* batch);
 
 void matrix_delete(Matrix* mat);
 
-void matrix_apply(Matrix* mat, void (*func)(double*));
+void matrix_apply(Matrix* mat, void (*func)(float*));
 
-void matrix_apply_rows(Matrix* mat,void (*func)(size_t, double*));
+void matrix_apply_rows(Matrix* mat,void (*func)(size_t, float*));
 
 void matrix_render(Matrix* mat);
 

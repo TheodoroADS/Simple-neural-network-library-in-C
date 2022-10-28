@@ -21,7 +21,7 @@ Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
     }   
 
 
-    mat->data = calloc(nb_rows,sizeof(double*));
+    mat->data = calloc(nb_rows,sizeof(float*));
 
     if (!mat->data){
         free(mat);
@@ -34,7 +34,7 @@ Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
 
     for(size_t i = 0 ; i < nb_rows;  i ++){
 
-        mat->data[i] = calloc(nb_cols, sizeof(double));
+        mat->data[i] = calloc(nb_cols, sizeof(float));
         if (!mat->data[i]){
             
             for (int j = 0; j < i ; j ++){
@@ -77,7 +77,7 @@ Matrix* matrix_zeros(size_t nb_rows, size_t nb_cols){
     
 }
 
-Matrix* as_vector(size_t dim, double* values){
+Matrix* as_vector(size_t dim, float* values){
 
     Matrix* vec = matrix_new(1, dim);
     
@@ -94,7 +94,7 @@ Matrix* as_vector(size_t dim, double* values){
     return vec;
 }
 
-Matrix* as_batch(size_t batch_size, size_t dim, double** values, Matrix* batch){
+Matrix* as_batch(size_t batch_size, size_t dim, float** values, Matrix* batch){
 
     if(!batch){
         
@@ -133,7 +133,7 @@ Matrix* matrix_random(size_t nb_rows, size_t nb_cols){
     {
         for (size_t j = 0; j < nb_cols; j++)
         {
-            mat->data[i][j] = (rand()/(((double) RAND_MAX + 1)/2) - 1);
+            mat->data[i][j] = (rand()/(((float) RAND_MAX + 1)/2) - 1);
         }
         
     }
@@ -154,7 +154,7 @@ void matrix_delete(Matrix* mat){
 }
 
 
-void matrix_apply(Matrix* mat, void (*func)(double*)){
+void matrix_apply(Matrix* mat, void (*func)(float*)){
 
     #pragma omp for
     for (size_t i = 0; i < mat->nb_rows; i++)
@@ -169,7 +169,7 @@ void matrix_apply(Matrix* mat, void (*func)(double*)){
 
 
 
-void matrix_apply_rows(Matrix* mat,void (*func)(size_t, double*)){
+void matrix_apply_rows(Matrix* mat,void (*func)(size_t, float*)){
 
     #pragma omp for
     for (size_t i = 0; i < mat->nb_rows; i++)
@@ -283,7 +283,7 @@ size_t matrix_argmax(Matrix* mat, size_t axis, size_t pos){
 
     assert(axis < 2 && axis >= 0);
 
-    double max;
+    float max;
     size_t argmax = 0;
 
     if(axis == 0){

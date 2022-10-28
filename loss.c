@@ -4,7 +4,7 @@
 #include "loss.h"
 
 
-void clip(size_t size, double* layer_values, double min, double max){
+void clip(size_t size, float* layer_values, float min, float max){
 
     for(size_t i = 0; i < size; i++){
         
@@ -18,10 +18,10 @@ void clip(size_t size, double* layer_values, double min, double max){
 
 }
 
-double mean_square_error(size_t size, double* layer_values, double* reference_values){
+float mean_square_error(size_t size, float* layer_values, float* reference_values){
     
-    double total_square_error = 0;
-    double err;
+    float total_square_error = 0.0f;
+    float err;
 
     for (size_t i = 0; i < size; i++)
     {
@@ -29,21 +29,21 @@ double mean_square_error(size_t size, double* layer_values, double* reference_va
         total_square_error += err*err;
     }
     
-    return total_square_error / ( (double) size);
+    return total_square_error / ( (float) size);
 }
 
-double d_mean_square_error(double layer_value, double reference_value ){
+float d_mean_square_error(float layer_value, float reference_value ){
 
     return 2*(layer_value - reference_value);
 }
 
-double categorical_cross_entropy(size_t size, double* layer_values, double* reference_values){
+float categorical_cross_entropy(size_t size, float* layer_values, float* reference_values){
 
 
     //clipping values to avoid having ln(0) or ln(1)
     //clip(size, layer_values, CLIP_MIN, CLIP_MAX);
 
-    double loss = 0;
+    float loss = 0.0f;
 
 
     for (size_t i = 0; i < size; i++)
@@ -63,7 +63,7 @@ double categorical_cross_entropy(size_t size, double* layer_values, double* refe
     return loss;
 }
 
-double d_categorical_cross_entropy(double layer_value, double reference_value){
+float d_categorical_cross_entropy(float layer_value, float reference_value){
     return reference_value /layer_value;
 }
 
