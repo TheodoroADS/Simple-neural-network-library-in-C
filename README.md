@@ -36,7 +36,7 @@ Here are the parameters that NN_create takes in:
 
     ``` C 
 
-    typedef void (*Output_Activation_func)(size_t , double*); 
+    typedef void (*Output_Activation_func)(size_t , float*); 
 
     ```
 
@@ -45,7 +45,7 @@ Here are the parameters that NN_create takes in:
 * loss_function : A pointer for the loss function used by the network. A valid loss function is defined in loss.h as:
 
     ``` C 
-    typedef double (*Loss_func)(size_t, double*, double*);
+    typedef float (*Loss_func)(size_t, float*, float*);
     ```
 
     For now, Categorical Cross Entropy and Mean Square Error are available and implemented in loss.c
@@ -56,7 +56,7 @@ Here are the parameters that NN_create takes in:
 Once your network is created, you can add hidden layers with the NN_add_hidden function, which takes the NN struct pointer and the parameters of the hidden layer you wish to add:
 
 ``` C
-    int NN_add_hidden(NN* network ,int layer_size, void (*layer_activation)(double*));
+    int NN_add_hidden(NN* network ,int layer_size, void (*layer_activation)(float*));
 
 ```
 
@@ -65,7 +65,7 @@ Other than the pointer to the network, this function accepts layer_size, which i
 A valid layer activation function shape is defined in activation.h as:
 
 ``` C
-    typedef void (*Activation_func)(double*); 
+    typedef void (*Activation_func)(float*); 
 ```
 
 For now, sigmoid, relu and leaky_relu are available and implemented in activation.c.
@@ -88,9 +88,9 @@ For classification tasks you can use NN_fit_classification:
     void NN_fit_classification(NN* network,
     size_t nb_examples,
     size_t nb_epochs,
-    double** values,
+    float** values,
     int* labels,
-    double learning_rate);
+    float learning_rate);
 ```
 
 This function will apply fit the network to the data provided (I tried to imitate the Keras library's fit function) and run the SGD algorithm over a fixed number of epochs. 
@@ -103,7 +103,7 @@ To use it you must provide the following arguments:
 
 * nb_epochs : the number of epochs you want to train the network over
 
-* values : a pointer to an array containing the data to be passed as the training set. This is a 2D array: the first dimension contains each individual example. Each example is itself an array containing the values of the input for this example (this values are of the double type). For example, for the MNIST dataset, each example is an array containing the values for every pixel of the image, and every example is contained in an array. This big array is the "values" input parameter. 
+* values : a pointer to an array containing the data to be passed as the training set. This is a 2D array: the first dimension contains each individual example. Each example is itself an array containing the values of the input for this example (this values are of the float type). For example, for the MNIST dataset, each example is an array containing the values for every pixel of the image, and every example is contained in an array. This big array is the "values" input parameter. 
 
 * labels : an array containing the label for each example as an integer. For the MNIST example, a label would be the digit the image represents as an integer value.
 
