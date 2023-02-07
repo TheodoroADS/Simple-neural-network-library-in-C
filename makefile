@@ -1,6 +1,12 @@
 CC=gcc
 CFLAGS= -Wall -Wextra --pedantic-errors -O3
 
+ifeq ($(OS),Windows_NT) 
+RM = del
+else
+RM= rm
+endif
+
 nn: main.o matrix.o nn.o activation.o loss.o optimizer.o eval.o
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -27,3 +33,9 @@ eval.o: eval.c eval.h
 
 main.o: main.c nn.h matrix.h loss.h activation.h
 	$(CC) $(CFLAGS) -c $<
+
+
+clean: 
+	$(RM) *.o
+	$(RM) *.exe
+	$(RM) *.gch
