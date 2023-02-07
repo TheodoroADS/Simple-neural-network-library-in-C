@@ -19,28 +19,6 @@
 #define BATCH_SIZE 32
 #define EPOCHS 30
 
-void print_csv(FILE* input_file){
-
-    char row[MAX_CSV_READ];
-
-    while(fgets(row, sizeof(row) , input_file)){
-
-
-        char* value; //the value separated between comas
-
-        value = strtok(row, ",");
-
-        while(value != NULL){
-            printf("%s", value);
-            value = strtok(NULL, ",");
-        }   
-
-        printf("\n");
-    }
-
-}
-
-
 void read_csv_mnist(FILE* input_file, int* labels, float** values){
 
 
