@@ -20,6 +20,8 @@ Matrix* as_vector(size_t dim, float* values);
 
 Matrix* as_batch(size_t batch_size, size_t dim , float** values, Matrix* batch);
 
+Matrix* matrix_of(size_t nb_rows , size_t nb_cols , float value);
+
 void matrix_delete(Matrix* mat);
 
 void matrix_apply(Matrix* mat, void (*func)(float*));

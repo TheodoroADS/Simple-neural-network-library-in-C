@@ -37,7 +37,7 @@ Matrix* matrix_new(size_t nb_rows, size_t nb_cols){
         mat->data[i] = calloc(nb_cols, sizeof(float));
         if (!mat->data[i]){
             
-            for (int j = 0; j < i ; j ++){
+            for (unsigned int j = 0; j < i ; j ++){
                 free(mat->data[i]);
             }
             free(mat->data);
@@ -129,6 +129,7 @@ Matrix* matrix_random(size_t nb_rows, size_t nb_cols){
         return NULL;
     }
 
+    #pragma omp parallel for
     for (size_t i = 0; i < nb_rows; i++)
     {
         for (size_t j = 0; j < nb_cols; j++)
@@ -140,6 +141,30 @@ Matrix* matrix_random(size_t nb_rows, size_t nb_cols){
 
     return mat;
 }
+
+
+Matrix* matrix_of(size_t nb_rows , size_t nb_cols , float value){
+
+    Matrix* mat = matrix_new(nb_rows,nb_cols);
+
+    if (!mat){
+        return NULL;
+    }
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < nb_rows; i++)
+    {
+        for (size_t j = 0; j < nb_cols; j++)
+        {
+            mat->data[i][j] = value;
+        }
+        
+    }
+    
+    return mat;
+
+}
+
 
 void matrix_delete(Matrix* mat){
 
@@ -156,9 +181,10 @@ void matrix_delete(Matrix* mat){
 
 void matrix_apply(Matrix* mat, void (*func)(float*)){
 
-    #pragma omp for
+
+    #pragma omp parallel for
     for (size_t i = 0; i < mat->nb_rows; i++)
-    {
+    {   
         for (size_t j = 0; j < mat->nb_cols; j++)
         {
             func(&mat->data[i][j]);
@@ -171,7 +197,7 @@ void matrix_apply(Matrix* mat, void (*func)(float*)){
 
 void matrix_apply_rows(Matrix* mat,void (*func)(size_t, float*)){
 
-    #pragma omp for
+    #pragma omp parallel for
     for (size_t i = 0; i < mat->nb_rows; i++)
     {
         func(mat->nb_cols, mat->data[i]);
@@ -207,7 +233,7 @@ void matrix_mul(Matrix* A, Matrix* B, Matrix* Res){
     assert(A->nb_cols == B->nb_rows);
     assert(A->nb_rows == Res->nb_rows && B->nb_cols == Res->nb_cols);
 
-    #pragma omp for
+    #pragma omp parallel for
     for (size_t i = 0; i < A->nb_rows; i++)
     {   
         for (size_t j = 0; j < B->nb_cols; j++)
@@ -230,9 +256,9 @@ void matrix_add(Matrix* M1, Matrix* M2){
     // printf("Matrix add: [%lld, %lld] + [%lld, %lld] \n",
     //  M1->nb_rows, M1->nb_cols, M2->nb_rows, M2->nb_cols);
 
-    #pragma omp for
     if(M1->nb_cols == M2->nb_cols && M1->nb_rows == M2->nb_rows){
 
+        #pragma omp parallel for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)
@@ -246,7 +272,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
     }else if (M2->nb_cols == 1){
         assert(M1->nb_rows == M2->nb_rows);
 
-        #pragma omp for
+        #pragma omp parallel for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)
@@ -260,7 +286,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
 
         assert(M1->nb_cols == M2->nb_cols);
 
-        #pragma omp for
+        #pragma omp parallel for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)
@@ -281,14 +307,14 @@ void matrix_add(Matrix* M1, Matrix* M2){
 
 size_t matrix_argmax(Matrix* mat, size_t axis, size_t pos){
 
-    assert(axis < 2 && axis >= 0);
+    assert(axis < 2);
 
     float max;
     size_t argmax = 0;
 
     if(axis == 0){
 
-        assert(pos >= 0 && pos < mat->nb_rows);
+        assert(pos < mat->nb_rows);
         
         max = mat->data[pos][0];
 
@@ -303,7 +329,7 @@ size_t matrix_argmax(Matrix* mat, size_t axis, size_t pos){
 
     }else{
 
-        assert(pos >= 0 && pos < mat->nb_cols);
+        assert(pos < mat->nb_cols);
 
         max = mat->data[0][pos];
 
