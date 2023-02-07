@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -Wall -Wextra --pedantic-errors -O3
+CFLAGS= -Wall -Wextra --pedantic-errors -O3 -fopenmp
 
 ifeq ($(OS),Windows_NT) 
 RM = del
