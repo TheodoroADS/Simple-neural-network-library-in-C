@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS= -Wall -Wextra --pedantic-errors -O3 -fopenmp
+CFLAGS= -Wall -Wextra --pedantic-errors -O3
 
 ifeq ($(OS),Windows_NT) 
 RM = del
