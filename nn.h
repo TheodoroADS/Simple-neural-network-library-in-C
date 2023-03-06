@@ -23,11 +23,11 @@ typedef struct NN{
 
     Matrix* inputs;
     Matrix* outputs;
-    int batch_size;
+    size_t batch_size;
     Hidden_layer** hidden_layers;
     Matrix* output_layer_weights; 
-    int hidden_layer_count;
-    int allocated_layers;
+    size_t hidden_layer_count;
+    size_t allocated_layers;
     Output_Activation_func output_activation;
     Loss_func loss_function;
     Optimizer optimizer;

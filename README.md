@@ -2,6 +2,7 @@
 
 This project consists in simple functions for creating multi layer perceptrons. I have created this project to better understand how a neural network works, and tried to implement its core algorithms without looking things up too much on the internet (especially backpropagation), so it is not very well optimised... I have tested my functions on the MNIST dataset, and got up to ~= 94% precision on the test set, the code for this example is in main.c.
 
+This program also does all it's computation on a CPU, because I do not own a GPU :(
 
 ## ***How to use the functions for creating a MLP*** 
 

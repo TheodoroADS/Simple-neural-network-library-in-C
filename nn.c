@@ -105,7 +105,7 @@ void NN_free(NN* network){
     
 }
 
-static int ensure_capacity(NN* network, int new_capacity){
+static int ensure_capacity(NN* network, unsigned int new_capacity){
 
     if(network->allocated_layers < new_capacity){
         if(!realloc(network->hidden_layers, new_capacity)){
@@ -270,7 +270,7 @@ static float** to_onehot(size_t batch_size, size_t output_size ,int* labels, flo
             exit(1);
         }
 
-        #pragma omp for
+        // // // #pragma omp parallel for
         for (size_t i = 0; i < batch_size; i++)
         {
             vectors[i] = calloc(output_size, sizeof(float));
@@ -286,7 +286,7 @@ static float** to_onehot(size_t batch_size, size_t output_size ,int* labels, flo
 
     }
 
-    #pragma omp for
+    // // // #pragma omp parallel for
     for (size_t i = 0; i < batch_size; i++)
     {
         for (size_t j = 0; j < output_size; j++)
@@ -348,7 +348,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
     
     //calculating dloss/dy * dy/dz 
-    #pragma omp for
+    // // #pragma omp parallel for
     for (size_t example = 0; example < network->outputs->nb_rows ; example++)
     {
         for (size_t value = 0; value < gradients_size ; value++)
@@ -360,7 +360,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
 
     //updating output weights
-    #pragma omp for 
+    // // #pragma omp parallel for 
     for (size_t i = 0; i < network->output_layer_weights->nb_rows; i++)
     {
         for (size_t j = 0; j < network->output_layer_weights->nb_cols; j++)
@@ -382,7 +382,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
     //computing gradients for the last hidden layer's activations
     //NOTE: inside of layer_gradients_current[i] is dactivation[i]/Z[i] * dloss/dactivaton[i] because of specific case of CCE + softmax
-    #pragma omp for
+    // // #pragma omp parallel for
     for (size_t activation = 0; activation < get_last_layer(network)->values.nb_cols; activation++)
     {
 
@@ -432,7 +432,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
         gradients_size = layer->values.nb_cols;
 
-        #pragma omp for
+        // // #pragma omp parallel for
         for (size_t i = 0; i < gradients_size; i++)
         {
 
@@ -450,7 +450,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
         #endif
 
         //adjusting biases
-        #pragma omp for
+        // // #pragma omp parallel for
         for (size_t i = 0; i < layer->biases.nb_cols; i++)
         {
             float bias_adjustment = 0;
@@ -466,7 +466,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
         
 
         //adjusting weights
-        #pragma omp for
+        // // #pragma omp parallel for
         for (size_t i = 0; i < layer->weights.nb_rows; i++)
         {
             for (size_t j = 0; j < layer->weights.nb_cols; j++)

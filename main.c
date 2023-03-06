@@ -137,13 +137,8 @@ int main(void){
     );
 
 
-    // NN_add_hidden(network, 126, relu);
     NN_add_hidden(network, 126, sigmoid);
     NN_add_hidden(network, 126, sigmoid);
-    // NN_add_hidden(network, 256, relu);
-    // NN_add_hidden(network, 126, relu);
-    // printf("Adding third layer \n");
-    // NN_add_hidden(network, 32, relu);
 
 
     NN_compile(network);

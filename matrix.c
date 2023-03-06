@@ -258,7 +258,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
 
     if(M1->nb_cols == M2->nb_cols && M1->nb_rows == M2->nb_rows){
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)
