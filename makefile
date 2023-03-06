@@ -1,4 +1,4 @@
-CC=gcc
+CC=clang
 CFLAGS= -Wall -Wextra --pedantic-errors -O3 -fopenmp
 
 ifeq ($(OS),Windows_NT) 
@@ -8,7 +8,7 @@ RM= rm
 endif
 
 nn: main.o matrix.o nn.o activation.o loss.o optimizer.o eval.o
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@.exe $^
 
 # matrix: matrix.o
 # 	$(CC) $(CFLAGS) -o $@ $^
