@@ -1,12 +1,14 @@
 #include "optimizer.h"
 
+#define UNUSED(x) (void)(x)
 
 float optimizer_default(Optimizer* opt , float layer_val, float reference_val){
     return opt->loss_d(layer_val, reference_val) * opt->out_activation_d(layer_val);
 }
 
 
-float optimizer_cce_and_softmax(Optimizer* opt , float layer_val, float reference_val){
+float optimizer_cce_and_softmax(Optimizer* _opt, float layer_val, float reference_val){
+    UNUSED(_opt);
     return  layer_val - reference_val;
 }
 

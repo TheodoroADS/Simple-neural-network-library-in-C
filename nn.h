@@ -36,7 +36,7 @@ typedef struct NN{
 
 } NN;
 
-NN* NN_create(int input_size, int batch_size, int output_size, void (*output_activation)(size_t ,float*), float (*loss_function)(size_t, float*, float*));
+NN* NN_create(unsigned int input_size,unsigned int batch_size,unsigned int output_size, void (*output_activation)(size_t ,float*), float (*loss_function)(size_t, float*, float*));
 
 void NN_free(NN* network);
 

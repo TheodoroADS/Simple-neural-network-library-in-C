@@ -37,7 +37,7 @@ static inline void foward(Hidden_layer layer,Matrix* input, Matrix* output){
 }
 
 
-NN* NN_create(int input_size, int batch_size, int output_size, Output_Activation_func output_activation, Loss_func loss_function)
+NN* NN_create(unsigned int input_size,unsigned int batch_size,unsigned int output_size, Output_Activation_func output_activation, Loss_func loss_function)
 {
 
     Matrix *inputLayer , *outputLayer;
@@ -346,6 +346,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
     
     //calculating dloss/dy * dy/dz 
+    #pragma omp parallel for
     for (size_t example = 0; example < network->outputs->nb_rows ; example++)
     {
         for (size_t value = 0; value < gradients_size ; value++)
@@ -357,6 +358,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
 
     //updating output weights
+    #pragma omp parallel for
     for (size_t i = 0; i < network->output_layer_weights->nb_rows; i++)
     {
         for (size_t j = 0; j < network->output_layer_weights->nb_cols; j++)
@@ -378,6 +380,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
     //computing gradients for the last hidden layer's activations
     //NOTE: inside of layer_gradients_current[i] is dactivation[i]/Z[i] * dloss/dactivaton[i] because of specific case of CCE + softmax
+    #pragma omp parallel for
     for (size_t activation = 0; activation < get_last_layer(network)->values.nb_cols; activation++)
     {
 
@@ -426,7 +429,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
         // because it will be used to calculate the gradients for the biases, the weights and the previous layer's activations
 
         gradients_size = layer->values.nb_cols;
-
+        #pragma omp parallel for
         for (size_t i = 0; i < gradients_size; i++)
         {
 
@@ -444,6 +447,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
         #endif
 
         //adjusting biases
+        #pragma omp parallel for
         for (size_t i = 0; i < layer->biases.nb_cols; i++)
         {
             float bias_adjustment = 0;
@@ -459,6 +463,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
         
 
         //adjusting weights
+        #pragma omp parallel for
         for (size_t i = 0; i < layer->weights.nb_rows; i++)
         {
             for (size_t j = 0; j < layer->weights.nb_cols; j++)
@@ -481,7 +486,7 @@ static void backpropagate(NN* network, float learning_rate,float** reference_val
 
             //computing gradients for the preivous layer activations
             //NOTE: inside of layer_gradients_current[i] is dactivation[i]/Z[i] * dloss/dactivaton[i]
-
+            #pragma omp parallel for
             for (size_t activation = 0; activation < previous_layer_activations->nb_cols; activation++)
             {
 

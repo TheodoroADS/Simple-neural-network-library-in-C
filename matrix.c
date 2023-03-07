@@ -106,7 +106,6 @@ Matrix* as_batch(size_t batch_size, size_t dim, float** values, Matrix* batch){
         }
     }
 
-
     for (size_t i = 0; i < batch_size; i++)
     {
         for (size_t j = 0; j < dim; j++)
@@ -179,7 +178,7 @@ void matrix_delete(Matrix* mat){
 
 void matrix_apply(Matrix* mat, void (*func)(float*)){
 
-
+    #pragma omp parallel for
     for (size_t i = 0; i < mat->nb_rows; i++)
     {   
         for (size_t j = 0; j < mat->nb_cols; j++)
@@ -194,6 +193,7 @@ void matrix_apply(Matrix* mat, void (*func)(float*)){
 
 void matrix_apply_rows(Matrix* mat,void (*func)(size_t, float*)){
 
+    #pragma omp parallel for 
     for (size_t i = 0; i < mat->nb_rows; i++)
     {
         func(mat->nb_cols, mat->data[i]);
@@ -229,6 +229,7 @@ void matrix_mul(Matrix* A, Matrix* B, Matrix* Res){
     assert(A->nb_cols == B->nb_rows);
     assert(A->nb_rows == Res->nb_rows && B->nb_cols == Res->nb_cols);
 
+    #pragma omp parallel for
     for (size_t i = 0; i < A->nb_rows; i++)
     {   
         for (size_t j = 0; j < B->nb_cols; j++)
@@ -250,9 +251,9 @@ void matrix_add(Matrix* M1, Matrix* M2){
 
     // printf("Matrix add: [%lld, %lld] + [%lld, %lld] \n",
     //  M1->nb_rows, M1->nb_cols, M2->nb_rows, M2->nb_cols);
-
     if(M1->nb_cols == M2->nb_cols && M1->nb_rows == M2->nb_rows){
 
+        #pragma omp parallel for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)
@@ -266,6 +267,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
     }else if (M2->nb_cols == 1){
         assert(M1->nb_rows == M2->nb_rows);
 
+        #pragma omp parallel for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)
@@ -279,6 +281,7 @@ void matrix_add(Matrix* M1, Matrix* M2){
 
         assert(M1->nb_cols == M2->nb_cols);
 
+        #pragma omp parallel for
         for (size_t i = 0; i < M1->nb_rows; i++)
         {
             for (size_t j = 0; j < M1->nb_cols; j++)

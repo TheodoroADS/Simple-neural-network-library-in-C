@@ -7,11 +7,14 @@ float NN_error_rate(size_t nb_examples , int* predictions, int* labels){
 
     size_t incorrect = 0;
 
+    #pragma omp parallel for
     for (size_t i = 0; i < nb_examples; i++)
     {
         if (predictions[i] != labels[i])
-        {
+        {   
+            #pragma omp atomic
             incorrect++;
+            
         }
         
     }
