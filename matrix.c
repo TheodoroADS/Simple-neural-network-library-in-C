@@ -204,13 +204,13 @@ void matrix_apply_rows(Matrix* mat,void (*func)(size_t, float*)){
 
 void matrix_render(Matrix* mat){
 
-    printf("Matrix: %lld X %lld :\n", mat->nb_rows, mat->nb_cols);
+    printf("Matrix: %zud X %zu :\n", mat->nb_rows, mat->nb_cols);
 
     for (size_t i = 0; i < mat->nb_rows; i++)
     {
         for (size_t j = 0; j < mat->nb_cols; j++)
         {
-            printf(" %lf ", mat->data[i][j]);
+            printf(" %f ", mat->data[i][j]);
         }
 
         printf("\n");

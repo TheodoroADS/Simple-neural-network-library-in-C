@@ -22,7 +22,7 @@
 
 #endif
 
-void Hidden_layer_free(Hidden_layer* layer){
+void    Hidden_layer_free(Hidden_layer* layer){
     matrix_delete(&layer->values);
     matrix_delete(&layer->weights);
     free(layer);
@@ -94,11 +94,11 @@ void NN_free(NN* network){
     matrix_delete(network->outputs);
     matrix_delete(network->output_layer_weights);
     
-    for (size_t i = 0; i < network->hidden_layer_count; i++)
+    for (size_t i = 1; i < network->hidden_layer_count - 1; i++)
     {
         Hidden_layer_free(network->hidden_layers[i]);
     }
-    
+
     free(network->hidden_layers);
 
     free(network);
@@ -197,7 +197,6 @@ int NN_compile(NN* network){
 
     network->output_layer_weights = output_layer_weights;
     network->ready = 1;
-    // printf("Do que porco \n");
     return 1;
 }
 
@@ -231,7 +230,7 @@ float NN_eval_loss(NN* network, float** reference_vals){
         loss += network->loss_function(network->outputs->nb_cols, network->outputs->data[i], reference_vals[i]);
     }
 
-    return loss / network->batch_size;
+    return loss / (float) network->batch_size;
 }   
 
 

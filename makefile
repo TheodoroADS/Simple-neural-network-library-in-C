@@ -1,14 +1,17 @@
 CC=clang
-CFLAGS= -Wall -Wextra --pedantic-errors -O3 -fopenmp
 
 ifeq ($(OS),Windows_NT) 
+CFLAGS= -Wall -Wextra --pedantic-errors -O3 -fopenmp
 RM = del
+TARGET=nn.exe
 else
 RM= rm
+CFLAGS= -Wall -Wextra --pedantic-errors -O3  -fopenmp
+TARGET=nn
 endif
 
-nn: main.o matrix.o nn.o activation.o loss.o optimizer.o eval.o
-	$(CC) $(CFLAGS) -o $@.exe $^
+$(TARGET): main.o matrix.o nn.o activation.o loss.o optimizer.o eval.o
+	$(CC) $(CFLAGS) -o $@ $^
 
 # matrix: matrix.o
 # 	$(CC) $(CFLAGS) -o $@ $^
@@ -37,5 +40,5 @@ main.o: main.c nn.h matrix.h loss.h activation.h
 
 clean: 
 	$(RM) *.o
-	$(RM) *.exe
 	$(RM) *.gch
+	$(RM) $(TARGET)

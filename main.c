@@ -17,7 +17,7 @@
 #define LEARNING_RATE 0.1
 
 #define BATCH_SIZE 32
-#define EPOCHS 8
+#define EPOCHS 10
 
 void read_csv_mnist(FILE* input_file, int* labels, float** values){
 
